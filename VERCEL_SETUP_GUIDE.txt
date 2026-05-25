@@ -1,0 +1,311 @@
+
+XRD LAB DATABASE — VERCEL + SUPABASE DEPLOYMENT GUIDE
+======================================================
+
+What you'll set up
+------------------
+  Supabase  →  free Postgres database (stores all your XRD data permanently)
+  Vercel    →  free hosting (serves the website to your labmates)
+  GitHub    →  free code storage (connects the two above)
+
+Total time: about 30–40 minutes. Free forever.
+Your final URL will look like: https://xrd-lab.vercel.app
+
+
+════════════════════════════════════════════════════════
+STEP 1 — Install Node.js and Git on your computer
+════════════════════════════════════════════════════════
+
+Skip this step if you already did it from the previous guide.
+
+  Node.js:  https://nodejs.org  →  download LTS  →  run installer
+  Git:      https://git-scm.com/downloads  →  download  →  run installer
+
+Check they worked (open a terminal and type):
+  node --version    ← should show v18 or v20
+  git --version     ← should show git version 2.x
+
+How to open a terminal:
+  Windows:  Press Win+R  →  type cmd  →  press Enter
+  Mac:      Press Cmd+Space  →  type Terminal  →  press Enter
+
+
+════════════════════════════════════════════════════════
+STEP 2 — Create a GitHub account and upload the code
+════════════════════════════════════════════════════════
+
+2a. Create GitHub account
+  → Go to https://github.com
+  → Click Sign up
+  → Enter email, username, password
+  → Verify your email
+
+2b. Create a new repository
+  → After logging in, click the  +  button (top right corner)
+  → Click "New repository"
+  → Fill in:
+      Repository name:  xrd-lab
+      Visibility:       Private    ← important!
+  → Do NOT tick any checkboxes (no README, no .gitignore)
+  → Click "Create repository"
+  → LEAVE THIS PAGE OPEN — you'll need it in a moment
+
+2c. Extract your project files
+  You have a file called xrd-lab-vercel.zip
+  Extract it to your Desktop or Documents, for example:
+    Windows:  C:\Users\YourName\Desktop\xrd-lab\
+    Mac:      /Users/YourName/Desktop/xrd-lab/
+
+  Inside the folder you should see:
+    api/
+    src/
+    public/
+    package.json
+    vercel.json
+    .gitignore
+
+2d. Open terminal inside the xrd-lab folder
+  Windows:
+    → Open the xrd-lab folder in File Explorer
+    → Click the address bar at the top
+    → Type  cmd  and press Enter
+    → A black terminal window opens inside that folder
+
+  Mac:
+    → Open Terminal
+    → Type  cd  followed by a space
+    → Drag the xrd-lab folder into the Terminal window
+    → Press Enter
+
+2e. Push code to GitHub
+  Run these commands ONE AT A TIME (press Enter after each):
+
+    git init
+    git add .
+    git commit -m "first commit"
+    git branch -M main
+
+  Now go back to the GitHub page from step 2b.
+  Copy the two lines that look like this:
+    git remote add origin https://github.com/YOURNAME/xrd-lab.git
+    git push -u origin main
+
+  Paste them into your terminal and press Enter.
+
+  ⚠ IMPORTANT — GitHub password:
+  GitHub does NOT accept your normal account password here.
+  You need a "token". Here's how to get one:
+
+    → Go to: https://github.com/settings/tokens
+    → Click "Generate new token (classic)"
+    → Give it any name, e.g. "xrd-lab"
+    → Tick the "repo" checkbox
+    → Scroll down and click "Generate token"
+    → Copy the token that appears (starts with  ghp_...)
+    → Use this as the password when git asks
+
+  After pushing, go to github.com/YOURNAME/xrd-lab
+  You should see all your files listed there. ✓
+
+
+════════════════════════════════════════════════════════
+STEP 3 — Set up Supabase (your free database)
+════════════════════════════════════════════════════════
+
+Supabase gives you a free Postgres database. Your XRD patterns
+are stored here permanently, even when the server restarts.
+
+3a. Create a Supabase account
+  → Go to: https://supabase.com
+  → Click "Start your project" (green button)
+  → Click "Continue with GitHub"  ← easiest, uses your GitHub account
+  → Authorise Supabase
+
+3b. Create a new project
+  → Click "New project"
+  → Fill in:
+      Name:      xrd-lab
+      Database Password:  create a strong password and WRITE IT DOWN
+      Region:    pick closest to you (e.g. Southeast Asia for India)
+  → Click "Create new project"
+  → Wait 1–2 minutes for it to set up (you'll see a loading screen)
+
+3c. Get the database connection string
+  This is the secret string that lets your app connect to the database.
+
+  → In your Supabase project, click the gear icon ⚙ (Settings) — bottom left
+  → Click "Database" in the left menu
+  → Scroll down to "Connection string"
+  → Click the "URI" tab
+  → You'll see something like:
+      postgresql://postgres:[YOUR-PASSWORD]@db.xxxxxxxxxxxx.supabase.co:5432/postgres
+  → Click the copy button to copy it
+  → Replace  [YOUR-PASSWORD]  with the password you wrote down in step 3b
+
+  SAVE THIS STRING — you'll paste it into Vercel in step 4.
+
+  Example of what it looks like when complete:
+    postgresql://postgres:MyPassword123@db.abcdefghijkl.supabase.co:5432/postgres
+
+
+════════════════════════════════════════════════════════
+STEP 4 — Deploy on Vercel
+════════════════════════════════════════════════════════
+
+4a. Create a Vercel account
+  → Go to: https://vercel.com
+  → Click "Sign Up"
+  → Click "Continue with GitHub"
+  → Authorise Vercel
+
+4b. Import your project
+  → In the Vercel dashboard, click "Add New..." → "Project"
+  → You'll see a list of your GitHub repositories
+  → Find  xrd-lab  and click "Import"
+
+4c. Configure the project
+  On the configuration screen:
+
+  Framework Preset:   Create React App   ← Vercel usually detects this automatically
+  Root Directory:     ./                 ← leave as default
+  Build Command:      npm run build      ← leave as default
+  Output Directory:   build              ← leave as default
+
+  Do NOT click Deploy yet — first add the environment variable below.
+
+4d. Add the database connection (IMPORTANT)
+  → Scroll down to "Environment Variables"
+  → Add one variable:
+      NAME:   DATABASE_URL
+      VALUE:  paste your Supabase connection string from Step 3c
+  → Click "Add"
+
+  It should look like:
+    DATABASE_URL = postgresql://postgres:MyPassword@db.xxxx.supabase.co:5432/postgres
+
+4e. Deploy!
+  → Click "Deploy"
+  → Vercel builds your app — takes 2–4 minutes
+  → Watch the logs scroll by
+  → When it says "Congratulations! Your deployment is ready"...
+  → Click "Visit" — your app is live!
+
+  Your URL looks like:  https://xrd-lab.vercel.app
+  or:  https://xrd-lab-yourname.vercel.app
+
+  Share this URL with your labmates. Done! ✓
+
+  The first time anyone opens the app, it automatically creates the
+  database tables and loads 5 demo XRD patterns. This takes ~5 seconds.
+
+
+════════════════════════════════════════════════════════
+STEP 5 — Test that everything works
+════════════════════════════════════════════════════════
+
+  → Open your Vercel URL
+  → You should see the XRD Lab Database with 5 demo patterns
+  → Click "Add Pattern", enter a composition like "BaTiO3"
+  → Upload an .xy file if you have one
+  → Click Save
+  → The new entry should appear in the list immediately
+  → Ask a labmate to open the same URL — they should see your entry too
+
+  If you see an error instead of demo data:
+  → Go to Vercel dashboard → your project → "Functions" tab
+  → Check for error messages
+  → Most likely cause: DATABASE_URL was not set correctly (go back to step 4d)
+
+
+════════════════════════════════════════════════════════
+STEP 6 — Updating the app in the future
+════════════════════════════════════════════════════════
+
+When you want to add a feature or fix something:
+
+  1. Edit the files on your computer
+  2. Open terminal in the xrd-lab folder
+  3. Run:
+       git add .
+       git commit -m "describe what you changed"
+       git push
+  4. Vercel automatically detects the push and redeploys in ~2 minutes
+  5. No other steps needed — your URL stays the same
+
+
+════════════════════════════════════════════════════════
+TROUBLESHOOTING
+════════════════════════════════════════════════════════
+
+Problem: App opens but shows "API error" or blank list
+Fix:
+  → The DATABASE_URL is wrong or missing
+  → Go to Vercel dashboard → your project → Settings → Environment Variables
+  → Check DATABASE_URL is there and looks correct
+  → Make sure you replaced [YOUR-PASSWORD] with your actual Supabase password
+  → After editing, go to Deployments → click the 3 dots → Redeploy
+
+Problem: Vercel build fails
+Fix:
+  → In Vercel dashboard, click the failed deployment → View Build Logs
+  → Look for the red error line
+  → Most common: a file is missing from GitHub
+  → In your terminal, run  git status  to check, then push again
+
+Problem: Git push asks for password every time
+Fix:
+  → Run:  git config --global credential.helper store
+  → Enter your token once more — it saves after that
+
+Problem: "Cannot find module pg" error in Vercel logs
+Fix:
+  → The pg package needs to be in package.json
+  → Check that your package.json has  "pg": "^8.11.3"  in dependencies
+  → If missing, add it, then push again
+
+Problem: Supabase connection refused
+Fix:
+  → Go to Supabase → Settings → Database
+  → Make sure "Allow all IP addresses" is enabled under connection pooling
+  → Or go to Supabase → Authentication → Policies and check RLS is not blocking
+
+Problem: I forgot my Supabase password
+Fix:
+  → Go to Supabase → Settings → Database → Reset database password
+  → Update the DATABASE_URL in Vercel environment variables with the new password
+  → Redeploy
+
+Problem: git push says "repository not found"
+Fix:
+  → Run:  git remote -v
+  → Check the URL shown is correct (github.com/YOUR-USERNAME/xrd-lab)
+  → If wrong:  git remote set-url origin https://github.com/YOURNAME/xrd-lab.git
+
+
+════════════════════════════════════════════════════════
+QUICK REFERENCE
+════════════════════════════════════════════════════════
+
+Your live app URL:
+  https://xrd-lab.vercel.app  (or whatever Vercel gave you)
+
+To push updates:
+  git add .
+  git commit -m "message"
+  git push
+
+Useful links:
+  Your GitHub repo:    https://github.com/YOURNAME/xrd-lab
+  Vercel dashboard:    https://vercel.com/dashboard
+  Supabase dashboard:  https://app.supabase.com
+
+Where is my data?
+  All patterns are in Supabase → your project → Table Editor → entries table
+  You can view, edit, or export them from there directly.
+
+How to export all data as CSV:
+  → Go to Supabase → Table Editor → entries
+  → Click the download/export button (top right)
+  → Saves as CSV — keep this as your backup
+
+════════════════════════════════════════════════════════
